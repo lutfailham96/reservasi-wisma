@@ -1,0 +1,40 @@
+<div class="sidebar-wrapper">
+    <ul class="nav">
+        <li class="nav-item  {{ dashboard_sidebar }}">
+            <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
+                <i class="material-icons">dashboard</i>
+                <p>Beranda</p>
+            </a>
+        </li>
+        <li class="nav-item {{ transaksi_sidebar }}">
+            <a class="nav-link" href="{{ url_for('admin_transaksi') }}">
+                <i class="material-icons">content_paste</i>
+                <p>Transaksi</p>
+            </a>
+        </li>
+        <li class="nav-item  {{ kamar_sidebar }}">
+            <a class="nav-link" href="{{ url_for('admin_kamar') }}">
+                <i class="material-icons">home</i>
+                <p>Kamar</p>
+            </a>
+        </li>
+        <li class="nav-item ">
+            <a class="nav-link" href="./user.html">
+                <i class="material-icons">home</i>
+                <p>Kelas Kamar</p>
+            </a>
+        </li>
+        <li class="nav-item {{ wisma_sidebar }}">
+            <a class="nav-link" href="{{ url_for('admin_wisma') }}">
+                <i class="material-icons">home_work</i>
+                <p>Wisma</p>
+            </a>
+        </li>
+        <li class="nav-item {{ user_sidebar }}">
+            <a class="nav-link" href="{{ url_for('admin_user') }}">
+                <i class="material-icons">person</i>
+                <p>Daftar Pengguna</p>
+            </a>
+        </li>
+    </ul>
+</div>
