@@ -29,7 +29,7 @@
                 </div>
             </div>
             <div class="box-body table-responsive">
-                <table id="table_wisma" class="table table-bordered table-striped">
+                <table id="table_kamar" class="table table-bordered table-striped">
                     <thead>
                     <tr>
                         <th>#</th>
@@ -77,7 +77,35 @@
     <script src="{{ url_for('static', filename='assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js') }}"></script>
     <script>
         $(document).ready(function() {
-            $('#table_wisma').DataTable();
+            $('#table_kamar').DataTable();
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    toastr.options = {
+                        "closeButton": false,
+                        "debug": false,
+                        "newestOnTop": true,
+                        "progressBar": false,
+                        "positionClass": "toast-top-right",
+                        "preventDuplicates": false,
+                        "onclick": null,
+                        "showDuration": "300",
+                        "hideDuration": "1000",
+                        "timeOut": "5000",
+                        "extendedTimeOut": "1000",
+                        "showEasing": "swing",
+                        "hideEasing": "linear",
+                        "showMethod": "fadeIn",
+                        "hideMethod": "fadeOut"
+                    }
+                    {% for category, message in messages %}
+                        {% if category == 'success' %}
+                            toastr['success']('{{ message }}', 'Sukses')
+                        {% elif category == 'error' %}
+                            toastr['error']('{{ message }}', 'Error')
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
         });
     </script>
     <!-- AdminLTE for demo purposes -->

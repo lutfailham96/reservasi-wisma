@@ -68,12 +68,6 @@ def admin_dashboard():
 def admin_user_data():
     users = User.query.all()
     form = UserDelForm()
-    if request.args.get('success') == 'true':
-        msg = request.args.get('msg')
-        return render_template('admin/user_data.html', users=users, form=form, success=True, msg=msg)
-    elif request.args.get('success') == 'false':
-        msg = request.args.get('msg')
-        return render_template('admin/user_data.html', users=users, form=form, success=False, msg=msg)
     return render_template('admin/user_data.html', users=users, form=form, user_sidebar='active')
 
 
@@ -82,8 +76,10 @@ def admin_user_data():
 def admin_user_del():
     id_user = request.form.get('id_user')
     if User.del_user(id_user):
-        return redirect(url_for('admin_user_data', success='true', msg='Data berhasil dihapus!'))
-    return redirect(url_for('admin_user_data', success='false', msg='Data gagal dihapus!'))
+        flash('Data berhasil dihapus', 'success')
+        return redirect(url_for('admin_user_data'))
+    flash('Data gagal dihapus', 'error')
+    return redirect(url_for('admin_user_data'))
 
 
 @app.route('/admin/home/user/add', methods=['GET', 'POST'])
@@ -103,7 +99,9 @@ def admin_user_add():
             return render_template('admin/user_add.html', user_data=user_data, form=form, username_exist=True)
         # if add user success
         if User.add_user(user_data):
-            return redirect(url_for('admin_user_data', success='true', msg='Data berhasil disimpan!'))
+            flash('Data berhasil disimpan', 'success')
+            return redirect(url_for('admin_user_data'))
+        flash('Data gagal disimpan', 'error')
         return render_template('admin/user_add.html', user_data=user_data, form=form)
     return render_template('admin/user_add.html', user_data=None, form=form)
 
@@ -128,7 +126,8 @@ def admin_user_edit(id_user):
         # if edit data success
         if user_data.edit_user():
             flash('Data berhasil diperbarui', 'success')
-            return redirect(url_for('admin_user_data', success='true', msg='Data berhasil diperbarui'))
+            return redirect(url_for('admin_user_data'))
+        flash('Data gagal diperbarui', 'error')
         return render_template('admin/user_edit.html', user_data=user_data, form=form)
     return render_template('admin/user_edit.html', user_data=user_data, form=form)
 
@@ -138,12 +137,6 @@ def admin_user_edit(id_user):
 def admin_wisma_data():
     wismas = Wisma.query.order_by(Wisma.nama_wisma).all()
     form = WismaDelForm()
-    if request.args.get('success') == 'true':
-        msg = request.args.get('msg')
-        return render_template('admin/wisma_data.html', wismas=wismas, form=form, success=True, msg=msg)
-    elif request.args.get('success') == 'false':
-        msg = request.args.get('msg')
-        return render_template('admin/wisma_data.html', wismas=wismas, form=form, success=False, msg=msg)
     return render_template('admin/wisma_data.html', wismas=wismas, form=form, wisma_sidebar='active')
 
 
@@ -152,8 +145,10 @@ def admin_wisma_data():
 def admin_wisma_del():
     form = WismaDelForm()
     if Wisma.del_wisma(form.id_wisma.data):
-        return redirect(url_for('admin_wisma_data', success='true', msg='Data berhasil dihapus!'))
-    return redirect(url_for('admin_wisma_data', success='false', msg='Data gagal dihapus!'))
+        flash('Data berhasil dihapus', 'success')
+        return redirect(url_for('admin_wisma_data'))
+    flash('Data gagal dihapus', 'error')
+    return redirect(url_for('admin_wisma_data'))
 
 
 @app.route('/admin/home/wisma/edit/<id_wisma>', methods=['GET', 'POST'])
@@ -171,7 +166,8 @@ def admin_wisma_edit(id_wisma):
         wisma_data.no_telp = form.no_telp.data
         # if edit data success
         if wisma_data.edit_wisma():
-            return redirect(url_for('admin_wisma_data', success='true', msg='Data berhasil diperbarui'))
+            flash('Data berhasil diperbarui', 'success')
+            return redirect(url_for('admin_wisma_data'))
         return render_template('admin/wisma_edit.html', wisma_data=wisma_data, form=form)
     return render_template('admin/wisma_edit.html', wisma_data=wisma_data, form=form)
 
@@ -188,7 +184,8 @@ def admin_wisma_add():
         )
         # if add wisma success
         if Wisma.add_wisma(wisma_data):
-            return redirect(url_for('admin_wisma_data', success='true', msg='Data berhasil disimpan!'))
+            flash('Data berhasil disimpan', 'success')
+            return redirect(url_for('admin_wisma_data'))
         return render_template('admin/wisma_add.html', wisma_data=wisma_data, form=form)
     return render_template('admin/wisma_add.html', wisma_data=None, form=form)
 
@@ -204,12 +201,6 @@ def admin_transaksi():
 def admin_kelas_kamar_data():
     kelas_kamars = db_sql.session.query(KelasKamar, Wisma).join(Wisma, KelasKamar.id_wisma == Wisma.id).order_by(Wisma.nama_wisma)
     form = KelasKamarDelForm()
-    if request.args.get('success') == 'true':
-        msg = request.args.get('msg')
-        return render_template('admin/kelas_kamar_data.html', kelas_kamars=kelas_kamars, form=form, success=True, msg=msg)
-    elif request.args.get('success') == 'false':
-        msg = request.args.get('msg')
-        return render_template('admin/kelas_kamar_data.html', kelas_kamars=kelas_kamars, form=form, success=False, msg=msg)
     return render_template('admin/kelas_kamar_data.html', kelas_kamars=kelas_kamars, form=form, kamar_sidebar='active', kamar_kelas_kamar_menu='class=active')
 
 
@@ -218,8 +209,10 @@ def admin_kelas_kamar_data():
 def admin_kelas_kamar_del():
     form = KelasKamarDelForm()
     if KelasKamar.del_kelas_kamar(form.id_kelas_kamar.data):
-        return redirect(url_for('admin_kelas_kamar_data', success='true', msg='Data berhasil dihapus!'))
-    return redirect(url_for('admin_kelas_kamar_data', success='false', msg='Data gagal dihapus!'))
+        flash('Data berhasil dihapus', 'success')
+        return redirect(url_for('admin_kelas_kamar_data'))
+    flash('Data gagal dihapus', 'error')
+    return redirect(url_for('admin_kelas_kamar_data'))
 
 
 @app.route('/admin/home/kelas_kamar/edit/<id_kelas_kamar>', methods=['GET', 'POST'])
@@ -238,7 +231,8 @@ def admin_kelas_kamar_edit(id_kelas_kamar):
         kelas_kamar_data.harga_kelas = form.harga_kelas.data
         # if edit data success
         if kelas_kamar_data.edit_kelas_kamar():
-            return redirect(url_for('admin_kelas_kamar_data', success='true', msg='Data berhasil diperbarui'))
+            flash('Data berhasil diperbarui', 'success')
+            return redirect(url_for('admin_kelas_kamar_data'))
         return render_template('admin/kelas_kamar_edit.html', kelas_kamar_data=kelas_kamar_data, form=form)
     return render_template('admin/kelas_kamar_edit.html', kelas_kamar_data=kelas_kamar_data, wismas=wismas, form=form, kamar_sidebar='active', kamar_kelas_kamar_menu='class=active')
 
@@ -256,7 +250,8 @@ def admin_kelas_kamar_add():
         )
         # if add kelas kamar success
         if KelasKamar.add_kelas_kamar(kelas_kamar_data):
-            return redirect(url_for('admin_kelas_kamar_data', success='true', msg='Data berhasil disimpan!'))
+            flash('Data berhasil disimpan', 'success')
+            return redirect(url_for('admin_kelas_kamar_data'))
         return render_template('admin/kelas_kamar_add.html', kelas_kamar_data=kelas_kamar_data, wismas=wismas, form=form)
     return render_template('admin/kelas_kamar_add.html', kelas_kamar_data=None, wismas=wismas, form=form, kamar_sidebar='active', kamar_kelas_kamar_menu='class=active')
 
@@ -284,7 +279,8 @@ def admin_kamar_edit(id_kamar):
         kamar_data.kondisi = form.kondisi.data
         # if edit data success
         if kamar_data.edit_kamar():
-            return redirect(url_for('admin_kamar_data', success='true', msg='Data berhasil diperbarui'))
+            flash('Data berhasil diperbarui', 'success')
+            return redirect(url_for('admin_kamar_data'))
         return render_template('admin/kamar_edit.html', kamar_data=kamar_data, form=form)
     return render_template('admin/kamar_edit.html', kamar_data=kamar_data, kelas_kamars=kelas_kamars, form=form, kamar_sidebar='active', kamar_kamar_menu='class=active')
 
@@ -302,7 +298,8 @@ def admin_kamar_add():
         )
         # if add wisma success
         if Kamar.add_kamar(kamar_data):
-            return redirect(url_for('admin_kamar_data', success='true', msg='Data berhasil disimpan!'))
+            flash('Data berhasil disimpan', 'success')
+            return redirect(url_for('admin_kamar_data'))
         return render_template('admin/kamar_add.html', kamar_data=kamar_data, kelas_kamars=kelas_kamars, form=form)
     return render_template('admin/kamar_add.html', kamar_data=None, kelas_kamars=kelas_kamars, form=form, kamar_sidebar='active', kamar_kamar_menu='class=active')
 
@@ -312,8 +309,10 @@ def admin_kamar_add():
 def admin_kamar_del():
     form = KamarDelForm()
     if Kamar.del_kamar(form.id_kamar.data):
-        return redirect(url_for('admin_kamar_data', success='true', msg='Data berhasil dihapus!'))
-    return redirect(url_for('admin_kamar_data', success='false', msg='Data gagal dihapus!'))
+        flash('Data berhasil dihapus', 'success')
+        return redirect(url_for('admin_kamar_data'))
+    flash('Data gagal dihapus', 'error')
+    return redirect(url_for('admin_kamar_data'))
 
 
 @app.route('/booking', methods=['GET', 'POST'])
