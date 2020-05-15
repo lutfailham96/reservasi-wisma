@@ -1,0 +1,94 @@
+{% extends 'admin/admin_base_layout.html' %}
+{% block title %}Kamar{% endblock %}
+{% block content %}
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            Kamar
+            <small>Kelas Kamar</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="#"><i class="fa fa-bed"></i> Kamar</a></li>
+            <li class="active">Kelas Kamar</li>
+        </ol>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        {% if success == True %}
+            <div class="alert alert-success alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h4><i class="icon fa fa-check"></i> Alert!</h4>
+                {{ msg }}
+            </div>
+        {% elif success == False %}
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h4><i class="icon fa fa-ban"></i> Alert!</h4>
+                {{ msg }}
+            </div>
+        {% endif %}
+        <!-- Default box -->
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">Data Kelas Kamar</h3>
+                <div class="pull-right">
+                    <a href="{{ url_for('admin_kelas_kamar_add') }}" class="btn btn-success btn-flat">
+                        <i class="fa fa-plus"></i>
+                        Tambah
+                    </a>
+                </div>
+            </div>
+            <div class="box-body table-responsive">
+                <table id="table_wisma" class="table table-bordered table-striped">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nama Kelas</th>
+                        <th>Wisma</th>
+                        <th>Harga Kelas</th>
+                        <th>Aksi</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for kelas_kamar in kelas_kamars %}<tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ kelas_kamar[0].nama_kelas }}</td>
+                        <td>{{ kelas_kamar[1].nama_wisma }}</td>
+                        <td class="uang">{{ kelas_kamar[0].harga_kelas }}</td>
+                        <td class="text-center" style="width: 150px">
+                            <form action="{{ url_for('admin_kelas_kamar_del') }}" method="post">
+                                {{ form.csrf_token }}
+                                <a href="{{ url_for('admin_kelas_kamar_edit', id_kelas_kamar=kelas_kamar[0].id) }}" class="btn bg-purple btn-sm">
+                                    <i class="fa fa-pencil"></i>
+                                    Update
+                                </a>
+                                <input type="hidden" name="id_kelas_kamar" value="{{ kelas_kamar[0].id }}">
+                                <button onclick="return confirm('Apakah anda yakin?')" class="btn btn-danger btn-sm">
+                                    <i class="fa fa-trash"></i>
+                                    Hapus
+                                </button>
+                            </form>
+                        </td>
+                    </tr>{% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <!-- /.box-body -->
+        </div>
+        <!-- /.box -->
+
+    </section>
+    <!-- /.content -->
+{% endblock %}
+{% block page_script %}<!-- DataTables -->
+    <script src="{{ url_for('static', filename='assets/bower_components/datatables.net/js/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js') }}"></script>
+    <script>
+        $(document).ready(function() {
+            $('#table_wisma').DataTable();
+        });
+    </script>
+    <!-- AdminLTE for demo purposes -->
+    <script src="{{ url_for('static', filename='assets/dist/js/demo.js') }}"></script>{% endblock %}
