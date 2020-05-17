@@ -1,0 +1,81 @@
+{% extends 'admin_base_layout.html' %}
+{% block title %}User{% endblock %}
+{% block content %}
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            Users
+            <small>Pengguna</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">Users</li>
+        </ol>
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        <!-- Default box -->
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">Data Pengguna</h3>
+                <div class="pull-right">
+                    <a href="{{ url_for('admin.user_add') }}" class="btn btn-success btn-flat">
+                        <i class="fa fa-user-plus"></i>
+                        Tambah
+                    </a>
+                </div>
+            </div>
+            <div class="box-body table-responsive">
+                <table id="table_user" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Nama</th>
+                            <th>Username</th>
+                            <th>Jabatan</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table_user_body">
+                    {% for user in users %}
+                        <tr data-id="{{ user.id }}">
+                            <td>{{ loop.index }}</td>
+                            <td>{{ user.nama }}</td>
+                            <td>{{ user.username }}</td>
+                            <td>{% if user.jabatan == 0 %}Admin{% elif user.jabatan == 1 %}Operator{% endif %}</td>
+                            <td>{% if user.status == 1 %}<span class="label bg-green">Aktif</span>{% else %}<span class="label bg-red">Nonaktif</span>{% endif %}</td>
+                            <td class="text-center" style="width: 150px">
+                                <a href="{{ url_for('admin.user_update', id_data=user.id) }}" class="btn bg-purple btn-sm">
+                                    <i class="fa fa-pencil"></i>
+                                    Update
+                                </a>
+                                <button onclick="delete_confirmation('user', {{ user.id }})" class="btn btn-danger btn-sm">
+                                    <i class="fa fa-trash"></i>
+                                    Hapus
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <!-- /.box-body -->
+        </div>
+        <!-- /.box -->
+    </section>
+    <!-- /.content -->
+{% endblock %}
+{% block custom_page_script %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <script>
+                $(document).ready(function () {
+                    {% for category, message in messages %}
+                        show_notification('{{ category }}', '{{ message }}');
+                    {% endfor %}
+                });
+            </script>
+        {% endif %}
+    {% endwith %}
+{% endblock %}

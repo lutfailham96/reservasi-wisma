@@ -1,0 +1,116 @@
+{% extends 'admin_base_layout.html' %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            Profile
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">Profile</li>
+        </ol>
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        <div class="row">
+            <div class="col-md-4">
+                <!-- Default box -->
+                <div class="box box-primary">
+                    <div class="box-body box-profile">
+                        <div class="">
+                            <img class="profile-user-img img-responsive img-circle" src="{{ url_for('admin.static', filename='assets/dist/img/user4-128x128.jpg') }}">
+                            <h3 class="profile-username text-center">{{ current_user.nama }}</h3>
+                            <p id="jabatan" class="text-center text-muted">{% if current_user.jabatan == 0 %}Admin{% elif current_user.jabatan == 1 %}Operator{% endif %}</p>
+                            <a href="#" class="btn bg-purple btn-block">Upload Foto</a>
+                        </div>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!-- /.box -->
+            </div>
+            <div class="col-md-8">
+                <div class="nav-tabs-custom">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a href="#tab_profile" data-toggle="tab">Profile</a></li>
+                        <li><a href="#tab_password" data-toggle="tab">Password</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tab_profile">
+                            <form class="form-horizontal" action="" method="post">
+                                {{ form.csrf_token }}
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">Nama</label>
+                                    <div class="col-sm-6">
+                                        <input name="nama" type="text" class="form-control" value="{{ current_user.nama }}" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-2 col-md-offset-2">
+                                        <button type="submit" class="btn btn-flat bg-purple">Simpan</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="tab-pane" id="tab_password">
+                            <form class="form-horizontal">
+                                <div class="form-group {% if form.password.errors %}has-error{% endif %}">
+                                    <label class="col-sm-2 control-label">Password</label>
+                                    <div class="col-sm-6">
+                                        <input name="password" type="text" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="form-group {% if form.password_confirmation.errors %}has-error{% endif %}">
+                                    <label class="col-sm-2 control-label">Konfirmasi password</label>
+                                    <div class="col-sm-6">
+                                        <input name="password_confirmation" type="text" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-2 col-md-offset-2">
+                                        <button type="submit" class="btn btn-flat bg-purple">Simpan</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+{% endblock %}
+{% block page_script %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <script>
+                $(document).ready(function() {
+                    toastr.options = {
+                        "closeButton": false,
+                        "debug": false,
+                        "newestOnTop": true,
+                        "progressBar": false,
+                        "positionClass": "toast-top-right",
+                        "preventDuplicates": false,
+                        "onclick": null,
+                        "showDuration": "300",
+                        "hideDuration": "1000",
+                        "timeOut": "5000",
+                        "extendedTimeOut": "1000",
+                        "showEasing": "swing",
+                        "hideEasing": "linear",
+                        "showMethod": "fadeIn",
+                        "hideMethod": "fadeOut"
+                    }
+                    {% for category, message in messages %}
+                        {% if category == 'success' %}
+                            toastr['success']('{{ message }}', 'Sukses')
+                        {% elif category == 'error' %}
+                            toastr['error']('{{ message }}', 'Error')
+                        {% endif %}
+                    {% endfor %}
+                });
+            </script>
+        {% endif %}
+    {% endwith %}
+{% endblock %}

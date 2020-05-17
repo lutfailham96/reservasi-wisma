@@ -39,7 +39,7 @@
                     <a class="button is-primary">
                         <strong>Daftar</strong>
                     </a>
-                    <a class="button is-light" href="{{ url_for('admin_login') }}">
+                    <a class="button is-light" href="{{ url_for('admin.admin_login') }}">
                         Masuk
                     </a>
                 </div>
@@ -160,7 +160,7 @@
     function tampil_kelas() {
         $.ajax({
             async: true,
-            url: '{{ url_for('api_kelas') }}',
+            url: '{{ url_for('api.api_kelas') }}',
             method: 'POST',
             dataType: 'json',
             data: {id_wisma: $('.wisma option:selected').val()},

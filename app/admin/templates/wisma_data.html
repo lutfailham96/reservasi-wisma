@@ -1,0 +1,92 @@
+{% extends 'admin_base_layout.html' %}
+{% block title %}Wisma{% endblock %}
+{% block content %}
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            Wisma
+            <small>Wisma</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">Wisma</li>
+        </ol>
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        {% if success == True %}
+            <div class="alert alert-success alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h4><i class="icon fa fa-check"></i> Alert!</h4>
+                {{ msg }}
+            </div>
+        {% elif success == False %}
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h4><i class="icon fa fa-ban"></i> Alert!</h4>
+                {{ msg }}
+            </div>
+        {% endif %}
+        <!-- Default box -->
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">Data Wisma</h3>
+                <div class="pull-right">
+                    <a href="{{ url_for('admin.wisma_add') }}" class="btn btn-success btn-flat">
+                        <i class="fa fa-plus"></i>
+                        Tambah
+                    </a>
+                </div>
+            </div>
+            <div class="box-body table-responsive">
+                <table id="table_wisma" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Nama Wisma</th>
+                            <th>Alamat Wisma</th>
+                            <th>No. Telp</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for wisma in wismas %}
+                        <tr id="row-{{ wisma.id }}">
+                            <td>{{ loop.index }}</td>
+                            <td>{{ wisma.nama_wisma }}</td>
+                            <td>{{ wisma.alamat_wisma }}</td>
+                            <td>{{ wisma.no_telp }}</td>
+                            <td class="text-center" style="width: 150px">
+                                <a href="{{ url_for('admin.wisma_update', id_data=wisma.id) }}" class="btn bg-purple btn-sm">
+                                    <i class="fa fa-pencil"></i>
+                                    Update
+                                </a>
+                                <button onclick="delete_confirmation('wisma', {{ wisma.id }})" class="btn btn-danger btn-sm">
+                                    <i class="fa fa-trash"></i>
+                                    Hapus
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <!-- /.box-body -->
+        </div>
+        <!-- /.box -->
+    </section>
+    <!-- /.content -->
+{% endblock %}
+{% block custom_page_script %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <script>
+                $(document).ready(function () {
+                    {% for category, message in messages %}
+                        show_notification('{{ category }}', '{{ message }}');
+                    {% endfor %}
+                });
+            </script>
+        {% endif %}
+    {% endwith %}
+{% endblock %}
