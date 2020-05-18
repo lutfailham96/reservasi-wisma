@@ -81,33 +81,13 @@
     <!-- /.content -->
 {% endblock %}
 {% block page_script %}
+{% block custom_page_script %}
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <script>
-                $(document).ready(function() {
-                    toastr.options = {
-                        "closeButton": false,
-                        "debug": false,
-                        "newestOnTop": true,
-                        "progressBar": false,
-                        "positionClass": "toast-top-right",
-                        "preventDuplicates": false,
-                        "onclick": null,
-                        "showDuration": "300",
-                        "hideDuration": "1000",
-                        "timeOut": "5000",
-                        "extendedTimeOut": "1000",
-                        "showEasing": "swing",
-                        "hideEasing": "linear",
-                        "showMethod": "fadeIn",
-                        "hideMethod": "fadeOut"
-                    }
+                $(document).ready(function () {
                     {% for category, message in messages %}
-                        {% if category == 'success' %}
-                            toastr['success']('{{ message }}', 'Sukses')
-                        {% elif category == 'error' %}
-                            toastr['error']('{{ message }}', 'Error')
-                        {% endif %}
+                        show_notification('{{ category }}', '{{ message }}');
                     {% endfor %}
                 });
             </script>

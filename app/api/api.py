@@ -1,6 +1,6 @@
-from flask import Blueprint, request, jsonify, abort, url_for
+from flask import Blueprint, request, jsonify, abort, url_for, render_template
 
-from app.admin.databases.models.kamar import KelasKamar
+from app.admin.databases.models.kamar import KelasKamar, Kamar
 from app.admin.databases.models.wisma import Wisma
 from app.databases import db_sql
 from app.managers import csrf
@@ -19,16 +19,16 @@ def api_kelas():
     return 'None', 404
 
 
-@bp_api.route('/test')
-def test():
-    data = {
-        'data': [
-            [
-                "Tiger Nixon"
-            ]
-        ]
-    }
-    return jsonify(data)
+# @bp_api.route('/test')
+# def test():
+#     data = {
+#         'data': [
+#             [
+#                 "Tiger Nixon"
+#             ]
+#         ]
+#     }
+#     return jsonify(data)
 
 
 @bp_api.route('/kelas_kamar', methods=['GET', 'DELETE'])
@@ -88,3 +88,52 @@ def kelas_kamar():
 #         'success': True,
 #         'data': data
 #     }
+
+@bp_api.route('/test')
+def test():
+    return render_template('test.html')
+
+
+@bp_api.route('/ajax/test')
+def ajax_test():
+    draw = int(request.args.get('draw'))
+    per_page = int(request.args.get('length'))
+    page = round((int(request.args.get('start')) / per_page) + 1)
+    search_arg = request.args.get('search[value]')
+    search = "%{}%".format(search_arg)
+
+    kamars = Kamar.query.paginate(page, per_page, False)
+
+    if len(str(search_arg).strip()) > 0:
+        # kamars = Kamar.query.filter((Kamar.nama_kamar.like(search))).all()
+        kamars = Kamar.query.filter(Kamar.nama_kamar.like(search)).paginate(page, per_page, False)
+
+    total_count = db_sql.session.query(Kamar).count()
+    filter_count = kamars.total
+
+    cols = []
+    for index, kamar in enumerate(kamars.items):
+        row = {
+            'index': index + 1,
+            'nama_kamar': kamar.nama_kamar,
+            'id_kelas_kamar': kamar.id_kelas_kamar,
+            'kondisi': kamar.kondisi
+        }
+        cols.append(row)
+
+    data = {
+        "draw": draw,
+        "recordsTotal": total_count,
+        "recordsFiltered": filter_count,
+        "data": cols
+    }
+
+    return data
+
+
+@bp_api.route('/hell')
+def hell():
+    dataset = db_sql.session.query(KelasKamar, Wisma).join(Wisma, KelasKamar.id_wisma == Wisma.id) \
+        .order_by(Wisma.nama_wisma, KelasKamar.nama_kelas).paginate(1, 20, False)
+    print(dataset.total)
+    return ''

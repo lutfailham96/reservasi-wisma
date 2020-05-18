@@ -7,13 +7,33 @@ $(document).ready(function () {
 function init_data_table() {
     $('#table_user').DataTable();
     $('#table_kamar').DataTable();
+    //$('#table_kelas_kamar').DataTable();
+    $('#table_transaksi').DataTable();
+    $('#table_wisma').DataTable();
     // $('#table_kelas_kamar').DataTable({
     //     'ajax': '/api/kelas_kamar'
     // });
-    $('#table_kelas_kamar').DataTable();
-    $('#table_transaksi').DataTable();
-    $('#table_wisma').DataTable();
-    mask_currency();
+    // mask_currency();
+    $('#table_kelas_kamar').DataTable( {
+        "processing": true,
+        "serverSide": true,
+        "ajax": $.fn.dataTable.pipeline( {
+            url: '/admin/ajax/kelas_kamar',
+            pages: 5 // number of pages to cache
+        } ),
+        'columns': [
+            { data: 'index'},
+            { data: 'nama_kelas'},
+            { data: 'id_wisma'},
+            { data: 'harga_kelas' },
+            {
+                data: null,
+                render: function (data, type, row) {
+                    return '<button class="btn btn-danger">Tombol</button><button class="btn btn-danger">Hapus</button>'
+                }
+            }
+        ]
+    } );
 }
 
 // mask currency column
@@ -38,7 +58,7 @@ function delete_confirmation(type, id) {
         if (result.value) {
             delete_data(type, id)
         } else {
-            refresh_table('kelas_kamar');
+            show_notification('error', 'Gagal menghapus data')
         }
     })
 }
@@ -60,9 +80,8 @@ function delete_data(type, id) {
         success: function(data, status, xhr) {
             if (xhr.status === 204) {
                 show_notification('success', 'Data berhasil dihapus');
-                // show_data_table(type)
+                $('#table_' + type).DataTable().ajax.reload()
                 $('#row-' + id).remove();
-                init_data_table();
             }
         }
     });
@@ -127,3 +146,96 @@ function refresh_table(table) {
 //             $('#table_kelas_kamar tbody').html(html);
 //         }
 //     });
+
+$.fn.dataTable.pipeline = function ( opts ) {
+    let conf = $.extend({
+        pages: 5,
+        url: '',
+        data: null,
+        method: 'GET'
+    }, opts );
+    let cacheLower = -1;
+    let cacheUpper = null;
+    let cacheLastRequest = null;
+    let cacheLastJson = null;
+    return function (request, drawCallback, settings) {
+        let ajax = false;
+        let requestStart = request.start;
+        let drawStart = request.start;
+        let requestLength = request.length;
+        let requestEnd = requestStart + requestLength;
+
+        if ( settings.clearCache ) {
+            ajax = true;
+            settings.clearCache = false;
+        }
+        else if ( cacheLower < 0 || requestStart < cacheLower || requestEnd > cacheUpper ) {
+            ajax = true;
+        }
+        else if ( JSON.stringify( request.order )   !== JSON.stringify( cacheLastRequest.order ) ||
+            JSON.stringify( request.columns ) !== JSON.stringify( cacheLastRequest.columns ) ||
+            JSON.stringify( request.search )  !== JSON.stringify( cacheLastRequest.search )
+        ) {
+            ajax = true;
+        }
+
+        cacheLastRequest = $.extend( true, {}, request );
+        if ( ajax ) {
+            if ( requestStart < cacheLower ) {
+                requestStart = requestStart - (requestLength*(conf.pages-1));
+                if ( requestStart < 0 ) {
+                    requestStart = 0;
+                }
+            }
+            cacheLower = requestStart;
+            cacheUpper = requestStart + (requestLength * conf.pages);
+            request.start = requestStart;
+            request.length = requestLength*conf.pages;
+            if ( typeof conf.data === 'function' ) {
+                let d = conf.data( request );
+                if ( d ) {
+                    $.extend( request, d );
+                }
+            }
+            else if ( $.isPlainObject( conf.data ) ) {
+                $.extend( request, conf.data );
+            }
+
+            return $.ajax( {
+                "type":     conf.method,
+                "url":      conf.url,
+                "data":     request,
+                "dataType": "json",
+                "cache":    false,
+                "success":  function ( json ) {
+                    cacheLastJson = $.extend(true, {}, json);
+
+                    if ( cacheLower !== drawStart ) {
+                        json.data.splice( 0, drawStart-cacheLower );
+                    }
+                    if ( requestLength >= -1 ) {
+                        json.data.splice( requestLength, json.data.length );
+                    }
+
+                    drawCallback( json );
+                }
+            } );
+        }
+        else {
+            json = $.extend( true, {}, cacheLastJson );
+            json.draw = request.draw; // Update the echo for each response
+            json.data.splice( 0, requestStart-cacheLower );
+            json.data.splice( requestLength, json.data.length );
+
+            drawCallback(json);
+        }
+    }
+};
+
+// Register an API method that will empty the pipelined data, forcing an Ajax
+// fetch on the next draw (i.e. `table.clearPipeline().draw()`)
+$.fn.dataTable.Api.register( 'clearPipeline()', function () {
+    return this.iterator( 'table', function ( settings ) {
+        settings.clearCache = true;
+    } );
+} );

@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField
+from wtforms import StringField, IntegerField
 from wtforms.validators import DataRequired, EqualTo
 
 
@@ -12,11 +12,7 @@ class UserForm(FlaskForm):
     status = StringField(validators=[DataRequired()])
 
 
-class UserDelForm(FlaskForm):
-    id_user = StringField(validators=[DataRequired()])
-
-
 class UserProfileForm(FlaskForm):
-    nama = StringField(validators=[DataRequired])
+    nama = StringField()
     password = StringField(validators=[EqualTo('password_confirmation')])
     password_confirmation = StringField(validators=[EqualTo('password')])

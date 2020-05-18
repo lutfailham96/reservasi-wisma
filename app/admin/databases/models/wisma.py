@@ -18,6 +18,18 @@ class Wisma(db_sql.Model):
         self.updated = datetime_jakarta()
 
     @staticmethod
+    def add(data):
+        try:
+            data.add_timestamp()
+            db_sql.session.add(data)
+            db_sql.session.commit()
+            return True
+        except Exception:
+            db_sql.session.rollback()
+            db_sql.session.flush()
+            return False
+
+    @staticmethod
     def update(data):
         try:
             data.update_timestamp()
@@ -33,18 +45,6 @@ class Wisma(db_sql.Model):
         try:
             data = Wisma.query.get(id_data)
             db_sql.session.delete(data)
-            db_sql.session.commit()
-            return True
-        except Exception:
-            db_sql.session.rollback()
-            db_sql.session.flush()
-            return False
-
-    @staticmethod
-    def add(data):
-        try:
-            data.add_timestamp()
-            db_sql.session.add(data)
             db_sql.session.commit()
             return True
         except Exception:

@@ -39,7 +39,7 @@
                     </thead>
                     <tbody id="table_user_body">
                     {% for user in users %}
-                        <tr data-id="{{ user.id }}">
+                        <tr id="row-{{ user.id }}">
                             <td>{{ loop.index }}</td>
                             <td>{{ user.nama }}</td>
                             <td>{{ user.username }}</td>

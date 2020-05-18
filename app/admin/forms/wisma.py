@@ -7,7 +7,3 @@ class WismaForm(FlaskForm):
     nama_wisma = StringField(validators=[DataRequired()])
     alamat_wisma = StringField(validators=[DataRequired()])
     no_telp = StringField(validators=[DataRequired()])
-
-
-class WismaDelForm(FlaskForm):
-    id_wisma = StringField(validators=[DataRequired()])
