@@ -6,7 +6,7 @@ from wtforms.validators import DataRequired
 class KelasKamarForm(FlaskForm):
     nama_kelas = StringField(validators=[DataRequired()])
     id_wisma = StringField(validators=[DataRequired()])
-    harga_kelas = IntegerField(validators=[DataRequired()])
+    harga_kelas = StringField(validators=[DataRequired()])
 
 
 class KamarForm(FlaskForm):

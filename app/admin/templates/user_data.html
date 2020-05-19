@@ -37,27 +37,27 @@
                             <th>Aksi</th>
                         </tr>
                     </thead>
-                    <tbody id="table_user_body">
-                    {% for user in users %}
-                        <tr id="row-{{ user.id }}">
-                            <td>{{ loop.index }}</td>
-                            <td>{{ user.nama }}</td>
-                            <td>{{ user.username }}</td>
-                            <td>{% if user.jabatan == 0 %}Admin{% elif user.jabatan == 1 %}Operator{% endif %}</td>
-                            <td>{% if user.status == 1 %}<span class="label bg-green">Aktif</span>{% else %}<span class="label bg-red">Nonaktif</span>{% endif %}</td>
-                            <td class="text-center" style="width: 150px">
-                                <a href="{{ url_for('admin.user_update', id_data=user.id) }}" class="btn bg-purple btn-sm">
-                                    <i class="fa fa-pencil"></i>
-                                    Update
-                                </a>
-                                <button onclick="delete_confirmation('user', {{ user.id }})" class="btn btn-danger btn-sm">
-                                    <i class="fa fa-trash"></i>
-                                    Hapus
-                                </button>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
+{#                    <tbody id="table_user_body">#}
+{#                    {% for user in users %}#}
+{#                        <tr id="row-{{ user.id }}">#}
+{#                            <td>{{ loop.index }}</td>#}
+{#                            <td>{{ user.nama }}</td>#}
+{#                            <td>{{ user.username }}</td>#}
+{#                            <td>{% if user.jabatan == 0 %}Admin{% elif user.jabatan == 1 %}Operator{% endif %}</td>#}
+{#                            <td>{% if user.status == 1 %}<span class="label bg-green">Aktif</span>{% else %}<span class="label bg-red">Nonaktif</span>{% endif %}</td>#}
+{#                            <td class="text-center" style="width: 150px">#}
+{#                                <a href="{{ url_for('admin.user_update', id_data=user.id) }}" class="btn bg-purple btn-sm">#}
+{#                                    <i class="fa fa-pencil"></i>#}
+{#                                    Update#}
+{#                                </a>#}
+{#                                <button onclick="delete_confirmation('user', {{ user.id }})" class="btn btn-danger btn-sm">#}
+{#                                    <i class="fa fa-trash"></i>#}
+{#                                    Hapus#}
+{#                                </button>#}
+{#                            </td>#}
+{#                        </tr>#}
+{#                    {% endfor %}#}
+{#                    </tbody>#}
                 </table>
             </div>
             <!-- /.box-body -->

@@ -74,6 +74,12 @@ class User(db_sql.Model, UserMixin):
     def check_password(self, password):
         return check_password_hash(self.password, password)
 
+    @staticmethod
+    def is_admin(id_data):
+        if id_data == 0:
+            return True
+        return False
+
 
 @login_manager.user_loader
 def load_user(user_id):

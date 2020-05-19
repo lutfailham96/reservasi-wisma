@@ -129,13 +129,15 @@
                             <span>Wisma</span>
                         </a>
                     </li>
-                    <li class="header">SETTINGS</li>
-                    <li class="{{ user_sidebar }}">
-                        <a href="{{ url_for('admin.user_data') }}">
-                            <i class="fa fa-users"></i>
-                            <span>Users</span>
-                        </a>
-                    </li>
+                    {% if current_user.jabatan == 0 %}
+                        <li class="header">SETTINGS</li>
+                        <li class="{{ user_sidebar }}">
+                            <a href="{{ url_for('admin.user_data') }}">
+                                <i class="fa fa-users"></i>
+                                <span>Users</span>
+                            </a>
+                        </li>
+                    {% endif %}
                 </ul>
             </section>
             <!-- /.sidebar -->

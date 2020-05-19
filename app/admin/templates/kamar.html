@@ -40,28 +40,28 @@
                         <th>Aksi</th>
                     </tr>
                     </thead>
-                    <tbody>
-                    {% for kamar in kamars %}<tr>
-                        <td>{{ loop.index }}</td>
-                        <td>{{ kamar.nama_kamar }}</td>
-                        <td>{{ kamar.id_kelas_kamar }}</td>
-                        <td>{{ kamar.kondisi }}</td>
-                        <td>{{ kamar.harga_kelas }}</td>
-                        <td class="text-center" style="width: 150px">
-                            <form action="" method="post">
-                                <a href="#" class="btn bg-purple btn-sm">
-                                    <i class="fa fa-pencil"></i>
-                                    Update
-                                </a>
-                                <input type="hidden" name="id_kamar" value="{{ kamar.id }}">
-                                <button onclick="return confirm('Apakah anda yakin?')" class="btn btn-danger btn-sm">
-                                    <i class="fa fa-trash"></i>
-                                    Hapus
-                                </button>
-                            </form>
-                        </td>
-                    </tr>{% endfor %}
-                    </tbody>
+{#                    <tbody>#}
+{#                    {% for kamar in kamars %}<tr>#}
+{#                        <td>{{ loop.index }}</td>#}
+{#                        <td>{{ kamar.nama_kamar }}</td>#}
+{#                        <td>{{ kamar.id_kelas_kamar }}</td>#}
+{#                        <td>{{ kamar.kondisi }}</td>#}
+{#                        <td>{{ kamar.harga_kelas }}</td>#}
+{#                        <td class="text-center" style="width: 150px">#}
+{#                            <form action="" method="post">#}
+{#                                <a href="#" class="btn bg-purple btn-sm">#}
+{#                                    <i class="fa fa-pencil"></i>#}
+{#                                    Update#}
+{#                                </a>#}
+{#                                <input type="hidden" name="id_kamar" value="{{ kamar.id }}">#}
+{#                                <button onclick="return confirm('Apakah anda yakin?')" class="btn btn-danger btn-sm">#}
+{#                                    <i class="fa fa-trash"></i>#}
+{#                                    Hapus#}
+{#                                </button>#}
+{#                            </form>#}
+{#                        </td>#}
+{#                    </tr>{% endfor %}#}
+{#                    </tbody>#}
                 </table>
             </div>
             <!-- /.box-body -->

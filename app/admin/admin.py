@@ -1,5 +1,7 @@
 from flask import Blueprint, redirect, url_for, render_template, request, flash, abort
 from flask_login import current_user, login_user, login_required, logout_user
+from sqlalchemy import text
+
 from app.admin.databases.models.kamar import Kamar, KelasKamar
 from app.admin.databases.models.transaksi import Transaksi
 from app.admin.databases.models.user import User
@@ -12,6 +14,15 @@ from app.databases import db_sql
 from app.managers.csrf import csrf
 
 bp_admin = Blueprint('admin', __name__, static_folder='static', template_folder='templates')
+
+
+@bp_admin.after_request
+def add_header(r):
+    r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    r.headers["Pragma"] = "no-cache"
+    r.headers["Expires"] = "0"
+    r.headers['Cache-Control'] = 'public, max-age=0'
+    return r
 
 
 @bp_admin.route('/login', methods=['GET', 'POST'])
@@ -45,7 +56,8 @@ def dashboard():
         'user': db_sql.session.query(User).count(),
         'kamar': db_sql.session.query(Kamar).count(),
         'wisma': db_sql.session.query(Wisma).count(),
-        'transaksi': db_sql.session.query(Transaksi).count()
+        'transaksi': db_sql.session.query(Transaksi).count(),
+        'kelas_kamar': db_sql.session.query(KelasKamar).count()
     }
     return render_template('dashboard.html', data=data, dashboard_sidebar='active')
 
@@ -53,6 +65,8 @@ def dashboard():
 @bp_admin.route('/home/user')
 @login_required
 def user_data():
+    if not User.is_admin(current_user.jabatan):
+        return redirect(url_for('admin.dashboard'))
     users = User.query.all()
     return render_template('user_data.html', users=users, user_sidebar='active')
 
@@ -60,6 +74,8 @@ def user_data():
 @bp_admin.route('/home/user/add', methods=['GET', 'POST'])
 @login_required
 def user_add():
+    if not User.is_admin(current_user.jabatan):
+        return redirect(url_for('admin.dashboard'))
     form = UserForm()
     # post user form
     if form.validate_on_submit():
@@ -86,6 +102,8 @@ def user_add():
 @bp_admin.route('/home/user/edit/<id_data>', methods=['GET', 'POST'])
 @login_required
 def user_update(id_data):
+    if not User.is_admin(current_user.jabatan):
+        return redirect(url_for('admin.dashboard'))
     form = UserForm()
     data = User.query.get(id_data)
     # check if data exist
@@ -188,7 +206,7 @@ def kelas_kamar_update(id_data):
     if form.validate_on_submit():
         data.nama_kelas = form.nama_kelas.data
         data.id_wisma = form.id_wisma.data
-        data.harga_kelas = form.harga_kelas.data
+        data.harga_kelas = form.harga_kelas.data.replace('.', '')
         # if update data success
         if KelasKamar.update(data):
             flash('Data berhasil diperbarui', 'success')
@@ -209,7 +227,7 @@ def kelas_kamar_add():
         data = KelasKamar(
             nama_kelas=form.nama_kelas.data,
             id_wisma=form.id_wisma.data,
-            harga_kelas=form.harga_kelas.data
+            harga_kelas=form.harga_kelas.data.replace('.', '')
         )
         # if add data success
         if KelasKamar.add(data):
@@ -306,19 +324,26 @@ def ajax_kelas_kamar():
     page = round((int(request.args.get('start')) / per_page) + 1)
     search_arg = request.args.get('search[value]')
     search = "%{}%".format(search_arg)
+    items = ['kelas_kamar.id', 'kelas_kamar.nama_kelas', 'wisma.nama_wisma', 'kelas_kamar.harga_kelas']
+    if int(request.args.get('order[0][column]')) >= len(items):
+        order_by = items[0]
+    else:
+        order_by = items[int(request.args.get('order[0][column]'))]
+    order_type = request.args.get('order[0][dir]')
     # paginate data
     list_data = db_sql.session.query(KelasKamar, Wisma).join(Wisma, KelasKamar.id_wisma == Wisma.id) \
-        .order_by(Wisma.nama_wisma, KelasKamar.nama_kelas).paginate(page, per_page, False)
+        .order_by(text('{} {}'.format(order_by, order_type))).paginate(page, per_page, False)
     # if contains search keywords
     if len(str(search_arg).strip()) > 0:
         list_data = db_sql.session.query(KelasKamar, Wisma).join(Wisma, KelasKamar.id_wisma == Wisma.id) \
-            .order_by(Wisma.nama_wisma, KelasKamar.nama_kelas).filter(KelasKamar.nama_kelas.like(search))\
+            .filter(KelasKamar.nama_kelas.like(search)).order_by(text('{} {}'.format(order_by, order_type)))\
             .paginate(page, per_page, False)
     total_count = db_sql.session.query(KelasKamar).count()
     filter_count = list_data.total
     data = []
     for index, item in enumerate(list_data.items):
         row = {
+            'DT_RowId': item[0].id,
             'index': index + 1,
             'id': item[0].id,
             'nama_kelas': item[0].nama_kelas,
@@ -337,7 +362,6 @@ def ajax_kelas_kamar():
 
 
 @bp_admin.route('/ajax/kamar', methods=['GET', 'DELETE'])
-@login_required
 @csrf.exempt
 def ajax_kamar():
     if request.method == 'DELETE':
@@ -347,8 +371,47 @@ def ajax_kamar():
                        'success': True
                    }, 204
         abort(500)
-    abort(500)
-
+    # get ajax request variable
+    draw = int(request.args.get('draw'))
+    per_page = int(request.args.get('length'))
+    page = round((int(request.args.get('start')) / per_page) + 1)
+    search_arg = request.args.get('search[value]')
+    search = "%{}%".format(search_arg)
+    items = ['kamar.id', 'kamar.nama_kamar', 'kelas_kamar.nama_kelas', 'kamar.kondisi', 'kelas_kamar.harga_kelas']
+    if int(request.args.get('order[0][column]')) >= len(items):
+        order_by = items[0]
+    else:
+        order_by = items[int(request.args.get('order[0][column]'))]
+    order_type = request.args.get('order[0][dir]')
+    # paginate data
+    list_data = db_sql.session.query(Kamar, KelasKamar).join(KelasKamar, Kamar.id_kelas_kamar == KelasKamar.id) \
+        .order_by(text('{} {}'.format(order_by, order_type))).paginate(page, per_page, False)
+    # if contains search keywords
+    if len(str(search_arg).strip()) > 0:
+        list_data = db_sql.session.query(Kamar, KelasKamar).join(KelasKamar, Kamar.id_kelas_kamar == KelasKamar.id) \
+            .filter(Kamar.nama_kamar.like(search)).order_by(text('{} {}'.format(order_by, order_type))) \
+            .paginate(page, per_page, False)
+    total_count = db_sql.session.query(Kamar).count()
+    filter_count = list_data.total
+    data = []
+    for index, item in enumerate(list_data.items):
+        row = {
+            'DT_RowId': item[0].id,
+            'index': index + 1,
+            'id': item[0].id,
+            'nama_kamar': item[0].nama_kamar,
+            'nama_kelas': item[1].nama_kelas,
+            'kondisi': item[0].kondisi,
+            'harga_kelas': item[1].harga_kelas
+        }
+        data.append(row)
+    response = {
+        "draw": draw,
+        "recordsTotal": total_count,
+        "recordsFiltered": filter_count,
+        "data": data
+    }
+    return response
 
 @bp_admin.route('/ajax/user', methods=['GET', 'DELETE'])
 @login_required
@@ -361,11 +424,48 @@ def ajax_user():
                        'success': True
                    }, 204
         abort(500)
-    abort(500)
+        # get ajax request variable
+    draw = int(request.args.get('draw'))
+    per_page = int(request.args.get('length'))
+    page = round((int(request.args.get('start')) / per_page) + 1)
+    search_arg = request.args.get('search[value]')
+    search = "%{}%".format(search_arg)
+    items = ['user.id', 'user.nama', 'user.username', 'user.jabatan', 'user.status']
+    if int(request.args.get('order[0][column]')) >= len(items):
+        order_by = items[0]
+    else:
+        order_by = items[int(request.args.get('order[0][column]'))]
+    order_type = request.args.get('order[0][dir]')
+    # paginate data
+    list_data = User.query.order_by(text('{} {}'.format(order_by, order_type))).paginate(page, per_page, False)
+    # if contains search keywords
+    if len(str(search_arg).strip()) > 0:
+        list_data = User.query.filter(User.nama.like(search)) \
+            .order_by(text('{} {}'.format(order_by, order_type))).paginate(page, per_page, False)
+    total_count = db_sql.session.query(User).count()
+    filter_count = list_data.total
+    data = []
+    for index, item in enumerate(list_data.items):
+        row = {
+            'DT_RowId': item.id,
+            'index': index + 1,
+            'id': item.id,
+            'nama': item.nama,
+            'username': item.username,
+            'jabatan': item.jabatan,
+            'status': item.status
+        }
+        data.append(row)
+    response = {
+        "draw": draw,
+        "recordsTotal": total_count,
+        "recordsFiltered": filter_count,
+        "data": data
+    }
+    return response
 
 
 @bp_admin.route('/ajax/wisma', methods=['GET', 'DELETE'])
-@login_required
 @csrf.exempt
 def ajax_wisma():
     if request.method == 'DELETE':
@@ -375,4 +475,41 @@ def ajax_wisma():
                        'success': True
                    }, 204
         abort(500)
-    abort(500)
+    # get ajax request variable
+    draw = int(request.args.get('draw'))
+    per_page = int(request.args.get('length'))
+    page = round((int(request.args.get('start')) / per_page) + 1)
+    search_arg = request.args.get('search[value]')
+    search = "%{}%".format(search_arg)
+    items = ['wisma.id', 'wisma.nama_wisma', 'wisma.alamat_wisma', 'wisma.no_telp']
+    if int(request.args.get('order[0][column]')) >= len(items):
+        order_by = items[0]
+    else:
+        order_by = items[int(request.args.get('order[0][column]'))]
+    order_type = request.args.get('order[0][dir]')
+    # paginate data
+    list_data = Wisma.query.order_by(text('{} {}'.format(order_by, order_type))).paginate(page, per_page, False)
+    # if contains search keywords
+    if len(str(search_arg).strip()) > 0:
+        list_data = Wisma.query.filter(Wisma.nama_wisma.like(search))\
+            .order_by(text('{} {}'.format(order_by, order_type))).paginate(page, per_page, False)
+    total_count = db_sql.session.query(Wisma).count()
+    filter_count = list_data.total
+    data = []
+    for index, item in enumerate(list_data.items):
+        row = {
+            'DT_RowId': item.id,
+            'index': index + 1,
+            'id': item.id,
+            'nama_wisma': item.nama_wisma,
+            'alamat_wisma': item.alamat_wisma,
+            'no_telp': item.no_telp,
+        }
+        data.append(row)
+    response = {
+        "draw": draw,
+        "recordsTotal": total_count,
+        "recordsFiltered": filter_count,
+        "data": data
+    }
+    return response
