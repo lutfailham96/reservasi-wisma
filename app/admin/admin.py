@@ -1,7 +1,9 @@
+import os
+from PIL import Image
 from flask import Blueprint, redirect, url_for, render_template, request, flash, abort
 from flask_login import current_user, login_user, login_required, logout_user
 from sqlalchemy import text
-
+from werkzeug.utils import secure_filename
 from app.admin.databases.models.kamar import Kamar, KelasKamar
 from app.admin.databases.models.transaksi import Transaksi
 from app.admin.databases.models.user import User
@@ -16,13 +18,19 @@ from app.managers.csrf import csrf
 bp_admin = Blueprint('admin', __name__, static_folder='static', template_folder='templates')
 
 
-@bp_admin.after_request
-def add_header(r):
-    r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    r.headers["Pragma"] = "no-cache"
-    r.headers["Expires"] = "0"
-    r.headers['Cache-Control'] = 'public, max-age=0'
-    return r
+# @bp_admin.after_request
+# def add_header(r):
+#     r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+#     r.headers["Pragma"] = "no-cache"
+#     r.headers["Expires"] = "0"
+#     r.headers['Cache-Control'] = 'public, max-age=0'
+#     return r
+
+
+@bp_admin.before_request
+def check_disabled():
+    if hasattr(current_user, 'id'):
+        User.is_disabled(current_user)
 
 
 @bp_admin.route('/login', methods=['GET', 'POST'])
@@ -35,10 +43,14 @@ def login():
     if form.validate_on_submit():
         data = User.query.filter_by(username=form.username.data).first()
         if data is not None and data.check_password(form.password.data):
+            if User.is_disabled(data):
+                return redirect(url_for('admin.login'))
             # save user's session
             login_user(data)
             return redirect(url_for('admin.dashboard'))
-        return render_template('login.html', form=form, invalid_credential=True)
+        # return render_template('login.html', form=form)
+        flash('Kombinasi username dan password salah!', 'error')
+        return redirect(url_for('admin.login'))
     return render_template('login.html', form=form)
 
 
@@ -96,7 +108,7 @@ def user_add():
         flash('Data gagal disimpan', 'error')
         # return render_template('user_add.html', form=form)
         return redirect(url_for('admin.user_add'))
-    return render_template('user_add.html', form=form)
+    return render_template('user_add.html', form=form, user_sidebar='active')
 
 
 @bp_admin.route('/home/user/edit/<id_data>', methods=['GET', 'POST'])
@@ -125,7 +137,7 @@ def user_update(id_data):
         flash('Data gagal diperbarui', 'error')
         # return render_template('user_update.html', form=form, data=data)
         return redirect(url_for('admin.user_update'))
-    return render_template('user_update.html', form=form, data=data)
+    return render_template('user_update.html', form=form, data=data, user_sidebar='active')
 
 
 @bp_admin.route('/home/wisma')
@@ -154,7 +166,7 @@ def wisma_update(id_data):
             return redirect(url_for('admin.wisma_data'))
         # return render_template('wisma_update.html', form=form, data=data)
         redirect(url_for('admin.wisma_update'))
-    return render_template('wisma_update.html', form=form, data=data)
+    return render_template('wisma_update.html', form=form, data=data, wisma_sidebar='active')
 
 
 @bp_admin.route('/home/wisma/add', methods=['GET', 'POST'])
@@ -174,7 +186,7 @@ def wisma_add():
             return redirect(url_for('admin.wisma_data'))
         # return render_template('wisma_add.html', form=form)
         redirect(url_for('admin.wisma_add'))
-    return render_template('wisma_add.html', form=form)
+    return render_template('wisma_add.html', form=form, wisma_sidebar='active')
 
 
 @bp_admin.route('/home/transaksi')
@@ -190,7 +202,7 @@ def kelas_kamar_data():
     kelas_kamars = db_sql.session.query(KelasKamar, Wisma).join(Wisma, KelasKamar.id_wisma == Wisma.id)\
         .order_by(Wisma.nama_wisma, KelasKamar.nama_kelas)
     return render_template('kelas_kamar_data.html', kelas_kamars=kelas_kamars, kamar_sidebar='active',
-                           kamar_kelas_kamar_menu='class=active')
+                           kelas_kamar_menu='active')
 
 
 @bp_admin.route('/home/kelas_kamar/edit/<id_data>', methods=['GET', 'POST'])
@@ -213,8 +225,7 @@ def kelas_kamar_update(id_data):
             return redirect(url_for('admin.kelas_kamar_data'))
         # return render_template('kelas_kamar_update.html', data=data, form=form)
         return redirect(url_for('admin.kelas_kamar_update'))
-    return render_template('kelas_kamar_update.html', form=form, data=data, wismas=wismas, kamar_sidebar='active',
-                           kamar_kelas_kamar_menu='class=active')
+    return render_template('kelas_kamar_update.html', form=form, data=data, wismas=wismas, kamar_sidebar='active')
 
 
 @bp_admin.route('/home/kelas_kamar/add', methods=['GET', 'POST'])
@@ -235,15 +246,14 @@ def kelas_kamar_add():
             return redirect(url_for('admin.kelas_kamar_data'))
         # return render_template('kelas_kamar_add.html', form=form, wismas=wismas)
         return redirect(url_for('admin.kelas_kamar_add'))
-    return render_template('kelas_kamar_add.html', form=form, wismas=wismas, kamar_sidebar='active',
-                           kamar_kelas_kamar_menu='class=active')
+    return render_template('kelas_kamar_add.html', form=form, wismas=wismas, kamar_sidebar='active')
 
 
 @bp_admin.route('/home/kamar')
 @login_required
 def kamar_data():
     kamars = db_sql.session.query(Kamar, KelasKamar).join(KelasKamar, Kamar.id_kelas_kamar == KelasKamar.id)
-    return render_template('kamar_data.html', kamars=kamars, kamar_sidebar='active', kamar_kamar_menu='class=active')
+    return render_template('kamar_data.html', kamars=kamars, kamar_sidebar='active', kamar_menu='active')
 
 
 @bp_admin.route('/home/kamar/edit/<id_data>', methods=['GET', 'POST'])
@@ -266,8 +276,7 @@ def kamar_update(id_data):
             return redirect(url_for('admin.kamar_data'))
         # return render_template('kamar_update.html', form=form, data=data)
         return redirect(url_for('admin.kamar_update'))
-    return render_template('kamar_update.html', form=form, data=data, kelas_kamars=kelas_kamars,
-                           kamar_sidebar='active', kamar_kamar_menu='class=active')
+    return render_template('kamar_update.html', form=form, data=data, kelas_kamars=kelas_kamars, kamar_sidebar='active')
 
 
 @bp_admin.route('/home/kamar/add', methods=['GET', 'POST'])
@@ -288,8 +297,7 @@ def kamar_add():
             return redirect(url_for('admin.kamar_data'))
         # return render_template('kamar_add.html', form=form, kelas_kamars=kelas_kamars)
         return redirect(url_for('admin.kamar_add'))
-    return render_template('kamar_add.html', form=form, kelas_kamars=kelas_kamars, kamar_sidebar='active',
-                           kamar_kamar_menu='class=active')
+    return render_template('kamar_add.html', form=form, kelas_kamars=kelas_kamars, kamar_sidebar='active')
 
 
 @bp_admin.route('/profile', methods=['GET', 'POST'])
@@ -300,7 +308,8 @@ def profile():
         data = User.query.get(int(current_user.id))
         if len(str(form.password.data).strip()) > 0:
             data.password = User.hash_password(form.password.data)
-        data.nama = form.nama.data
+        if len(str(form.nama.data).strip()) > 0:
+            data.nama = form.nama.data
         if User.update(data):
             flash('Update profile berhasil!', 'success')
             return redirect(url_for('admin.profile'))
@@ -308,9 +317,39 @@ def profile():
     return render_template('profile.html', form=form)
 
 
-@bp_admin.route('/ajax/kelas_kamar', methods=['GET', 'DELETE'])
+def allowed_file(filename):
+    allowed = {'png', 'jpg', 'jpeg'}
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed
+
+
+@bp_admin.route('/profile/photo', methods=['POST'])
+@login_required
+def profile_photo():
+    if request.method == 'POST':
+        file = request.files['file']
+        if file and allowed_file(file.filename):
+            upload_dir = '/app/admin/static/uploads/img'
+            filename = secure_filename(str(current_user.id))
+            file.save(os.path.join(os.getcwd() + upload_dir, filename + '_f.jpg'))
+            # Compress image
+            original_file = Image.open(os.path.join(os.getcwd() + upload_dir, filename + '_f.jpg'))
+            original_file = original_file.convert('RGB')
+            # medium size
+            m_size = 160
+            wpercent = (m_size / float(original_file.size[1]))
+            hsize = int((float(original_file.size[0]) * float(wpercent)))
+            med_file = original_file.resize((hsize, m_size), Image.ANTIALIAS)
+            # med_file = original_file.resize((160, 160), Image.ANTIALIAS)
+            med_file.save(os.path.join(os.getcwd() + upload_dir, filename + '_m.jpg'), optimze=True, quality=95)
+            flash('Foto profile berhasil diubah', 'success')
+            return redirect(url_for('admin.profile'))
+        abort(403)
+
+
+@bp_admin.route('/ajax/data/kelas_kamar', methods=['GET', 'DELETE'])
+@login_required
 @csrf.exempt
-def ajax_kelas_kamar():
+def ajax_data_kelas_kamar():
     if request.method == 'DELETE':
         id_data = request.get_json()['id']
         if KelasKamar.delete(id_data):
@@ -361,9 +400,10 @@ def ajax_kelas_kamar():
     return response
 
 
-@bp_admin.route('/ajax/kamar', methods=['GET', 'DELETE'])
+@bp_admin.route('/ajax/data/kamar', methods=['GET', 'DELETE'])
+@login_required
 @csrf.exempt
-def ajax_kamar():
+def ajax_data_kamar():
     if request.method == 'DELETE':
         id_data = request.get_json()['id']
         if Kamar.delete(id_data):
@@ -413,10 +453,13 @@ def ajax_kamar():
     }
     return response
 
-@bp_admin.route('/ajax/user', methods=['GET', 'DELETE'])
+
+@bp_admin.route('/ajax/data/user', methods=['GET', 'DELETE'])
 @login_required
 @csrf.exempt
-def ajax_user():
+def ajax_data_user():
+    if not User.is_admin(current_user.jabatan):
+        abort(403)
     if request.method == 'DELETE':
         id_data = request.get_json()['id']
         if User.delete(id_data):
@@ -465,9 +508,10 @@ def ajax_user():
     return response
 
 
-@bp_admin.route('/ajax/wisma', methods=['GET', 'DELETE'])
+@bp_admin.route('/ajax/data/wisma', methods=['GET', 'DELETE'])
+@login_required
 @csrf.exempt
-def ajax_wisma():
+def ajax_data_wisma():
     if request.method == 'DELETE':
         id_data = request.get_json()['id']
         if Wisma.delete(id_data):
