@@ -18,12 +18,18 @@
                 <!-- Default box -->
                 <div class="box box-primary">
                     <div class="box-body box-profile">
-                        <div class="">
-                            <img class="profile-user-img img-responsive img-circle" src="{{ url_for('admin.static', filename='assets/dist/img/user4-128x128.jpg') }}">
+                        <form action="{{ url_for('admin.profile_photo') }}" method="post" enctype="multipart/form-data">
+                            {{ form.csrf_token }}
+                            <img id="image-view" class="profile-user-img img-responsive img-circle" src="{{ url_for('admin.static', filename='uploads/img/{}_m.jpg'.format(current_user.id)) }}">
                             <h3 class="profile-username text-center">{{ current_user.nama }}</h3>
                             <p id="jabatan" class="text-center text-muted">{% if current_user.jabatan == 0 %}Admin{% elif current_user.jabatan == 1 %}Operator{% endif %}</p>
-                            <a href="#" class="btn bg-purple btn-block">Upload Foto</a>
-                        </div>
+                            <div class="form-group">
+                                <input class="form-control" type="file" name="file" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="submit" name="submit" class="form-control btn bg-purple btn-block" value="Upload foto">
+                            </div>
+                        </form>
                     </div>
                     <!-- /.box-body -->
                 </div>
@@ -59,17 +65,21 @@
                             </form>
                         </div>
                         <div class="tab-pane" id="tab_password">
-                            <form class="form-horizontal">
+                            <form class="form-horizontal" action="" method="post" oninput='password_confirmation.setCustomValidity(password_confirmation.value != password.value ? "Passwords do not match." : "")'>
+                                {{ form.csrf_token }}
+                                <div class="form-group">
+                                    <span class="help-block col-sm-6 col-md-offset-2">Biarkan kosong bila tidak diganti</span>
+                                </div>
                                 <div class="form-group {% if form.password.errors %}has-error{% endif %}">
                                     <label class="col-sm-2 control-label">Password</label>
                                     <div class="col-sm-6">
-                                        <input name="password" type="text" class="form-control">
+                                        <input name="password" type="password" class="form-control">
                                     </div>
                                 </div>
                                 <div class="form-group {% if form.password_confirmation.errors %}has-error{% endif %}">
                                     <label class="col-sm-2 control-label">Konfirmasi password</label>
                                     <div class="col-sm-6">
-                                        <input name="password_confirmation" type="text" class="form-control">
+                                        <input name="password_confirmation" type="password" class="form-control">
                                     </div>
                                 </div>
                                 <div class="form-group">
