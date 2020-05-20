@@ -34,13 +34,17 @@
     </div>
     <!-- /.login-logo -->
     <div class="login-box-body">
-        {% if invalid_credential %}
-            <div class="callout callout-danger">
-                <p>Kombinasi username dan password salah!</p>
-            </div>
-        {% else %}
-            <p class="login-box-msg">Sign in to start your session</p>
-        {% endif %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="callout callout-danger">
+                        <p>{{ message }}</p>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="login-box-msg">Sign in to start your session</p>
+            {% endif %}
+        {% endwith %}
         <form action="" method="post">
             {{ form.csrf_token }}
             <div class="form-group has-feedback">
