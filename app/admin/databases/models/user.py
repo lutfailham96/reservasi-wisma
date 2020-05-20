@@ -1,4 +1,5 @@
-from flask_login import UserMixin
+from flask import flash
+from flask_login import UserMixin, logout_user
 from app.databases.db_sql import db_sql
 from app.managers import login_manager
 from app.utils.TimeUtils import datetime_jakarta
@@ -77,6 +78,14 @@ class User(db_sql.Model, UserMixin):
     @staticmethod
     def is_admin(id_data):
         if id_data == 0:
+            return True
+        return False
+
+    @staticmethod
+    def is_disabled(data):
+        if data.status == 0:
+            flash('User nonaktif')
+            logout_user()
             return True
         return False
 
