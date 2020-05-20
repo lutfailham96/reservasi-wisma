@@ -29,7 +29,7 @@
             <div class="box-body">
                 <div class="row">
                     <div class="col-md-4 col-md-offset-4">
-                        <form action="" method="post">
+                        <form action="" method="post" oninput='password_confirmation.setCustomValidity(password_confirmation.value != password.value ? "Passwords do not match." : "")'>
                             {{ form.csrf_token }}
                             <div class="form-group {% if form.nama.errors %}has-error{% endif %}">
                                 <label>Nama</label>
