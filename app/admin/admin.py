@@ -18,13 +18,13 @@ from app.managers.csrf import csrf
 bp_admin = Blueprint('admin', __name__, static_folder='static', template_folder='templates')
 
 
-# @bp_admin.after_request
-# def add_header(r):
-#     r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-#     r.headers["Pragma"] = "no-cache"
-#     r.headers["Expires"] = "0"
-#     r.headers['Cache-Control'] = 'public, max-age=0'
-#     return r
+@bp_admin.after_request
+def add_header(r):
+    r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    r.headers["Pragma"] = "no-cache"
+    r.headers["Expires"] = "0"
+    r.headers['Cache-Control'] = 'public, max-age=0'
+    return r
 
 
 @bp_admin.before_request

@@ -38,27 +38,27 @@
                             <th>Aksi</th>
                         </tr>
                     </thead>
-                    <tbody>
-                    {% for kamar in kamars %}
-                        <tr id="row-{{ kamar[0].id }}">
-                            <td>{{ loop.index }}</td>
-                            <td>{{ kamar[0].nama_kamar }}</td>
-                            <td>{{ kamar[1].nama_kelas }}</td>
-                            <td>{% if kamar[0].kondisi == 0 %}<span class="label bg-green">Kosong</span>{% elif kamar[0].kondisi == 1 %}<span class="label bg-yellow">Dibooking</span>{% elif kamar[0].kondisi == 2 %}<span class="label bg-gray">Kotor</span>{% elif kamar[0].kondisi == 3 %}<span class="label bg-red">Rusak</span>{% endif %}</td>
-                            <td class="uang">{{ kamar[1].harga_kelas }}</td>
-                            <td class="text-center" style="width: 150px">
-                                <a href="{{ url_for('admin.kamar_update', id_data=kamar[0].id) }}" class="btn bg-purple btn-sm">
-                                    <i class="fa fa-pencil"></i>
-                                    Update
-                                </a>
-                                <button onclick="delete_confirmation('kamar', {{ kamar[0].id }})" class="btn btn-danger btn-sm">
-                                    <i class="fa fa-trash"></i>
-                                    Hapus
-                                </button>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
+{#                    <tbody>#}
+{#                    {% for kamar in kamars %}#}
+{#                        <tr id="row-{{ kamar[0].id }}">#}
+{#                            <td>{{ loop.index }}</td>#}
+{#                            <td>{{ kamar[0].nama_kamar }}</td>#}
+{#                            <td>{{ kamar[1].nama_kelas }}</td>#}
+{#                            <td>{% if kamar[0].kondisi == 0 %}<span class="label bg-green">Kosong</span>{% elif kamar[0].kondisi == 1 %}<span class="label bg-yellow">Dibooking</span>{% elif kamar[0].kondisi == 2 %}<span class="label bg-gray">Kotor</span>{% elif kamar[0].kondisi == 3 %}<span class="label bg-red">Rusak</span>{% endif %}</td>#}
+{#                            <td class="uang">{{ kamar[1].harga_kelas }}</td>#}
+{#                            <td class="text-center" style="width: 150px">#}
+{#                                <a href="{{ url_for('admin.kamar_update', id_data=kamar[0].id) }}" class="btn bg-purple btn-sm">#}
+{#                                    <i class="fa fa-pencil"></i>#}
+{#                                    Update#}
+{#                                </a>#}
+{#                                <button onclick="delete_confirmation('kamar', {{ kamar[0].id }})" class="btn btn-danger btn-sm">#}
+{#                                    <i class="fa fa-trash"></i>#}
+{#                                    Hapus#}
+{#                                </button>#}
+{#                            </td>#}
+{#                        </tr>#}
+{#                    {% endfor %}#}
+{#                    </tbody>#}
                 </table>
             </div>
             <!-- /.box-body -->

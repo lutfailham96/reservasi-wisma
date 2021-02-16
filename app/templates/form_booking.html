@@ -15,138 +15,117 @@
     </style>
 </head>
 <body>
-<nav class="navbar is-info level" role="navigation" aria-label="main navigation">
-    <div class="navbar-brand">
-        {#            <a class="navbar-item" href="https://bulma.io">#}
-        {#                <img src="https://bulma.io/images/bulma-logo.png" width="112" height="28">#}
-        {#            </a>#}
-
-        <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-        </a>
-    </div>
-    <div id="navbarBasicExample" class="navbar-menu">
-        <div class="navbar-start">
-            <a class="navbar-item">
-                Home
+<nav class="navbar is-info" role="navigation" aria-label="main navigation">
+    <div class="container">
+        <div class="navbar-brand">
+            <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
             </a>
         </div>
-        <div class="navbar-end">
-            <div class="navbar-item">
-                <div class="buttons">
-                    <a class="button is-primary">
-                        <strong>Daftar</strong>
-                    </a>
-                    <a class="button is-light" href="{{ url_for('admin.login') }}">
-                        Masuk
-                    </a>
+        <div id="navbarBasicExample" class="navbar-menu">
+            <div class="navbar-start">
+                <a class="navbar-item">
+                    Home
+                </a>
+            </div>
+            <div class="navbar-end">
+                <div class="navbar-item">
+                    <div class="buttons">
+                        <a class="button is-primary">
+                            <strong>Daftar</strong>
+                        </a>
+                        <a class="button is-light" href="{{ url_for('admin.login') }}">
+                            Masuk
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </nav>
-<div class="columns level">
-    <div class="column is-5 is-offset-4">
-        <div class="column"><h4 class="title is-4">Booking Wisma Online</h4></div>
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="column notification is-primary">
-                        <button class="delete"></button>
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        <div class="box">
-            <form action="" method="post">
-                {{ form.csrf_token }}
-                <div class="field">
-                    <label class="label">Nama</label>
-                    <div class="control is-expanded has-icons-left">
-                        <input name="nama_konsumen" class="input" type="text" placeholder="Nama lengkap" required>
-                        <span class="icon is-small is-left">
+<div class="container">
+    <div class="columnn">
+        <div class="column is-5 is-offset-4">
+            <div class="column"><h4 class="title is-4">Booking Wisma Online</h4></div>
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="column notification is-primary">
+                            <button class="delete"></button>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            <div class="box">
+                <form action="" method="post">
+                    {{ form.csrf_token }}
+                    <div class="field">
+                        <label for="nama_konsumen" class="label">Nama</label>
+                        <div class="control is-expanded has-icons-left">
+                            <input id="nama_konsumen" name="nama_konsumen" class="input" type="text" placeholder="Nama lengkap" required>
+                            <span class="icon is-small is-left">
                         <i class="fas fa-user"></i>
                     </span>
-                    </div>
-                </div>
-                <div class="field">
-                    <label class="label">Alamat</label>
-                    <div class="control">
-                        <textarea name="alamat_konsumen" class="textarea" placeholder="Alamat lengkap" rows="2" required></textarea>
-                    </div>
-                </div>
-                <div class="field">
-                    <label class="label">No. telp</label>
-                    <div class="control is-expanded has-icons-left">
-                        <input name="kontak_konsumen" class="input" type="text" placeholder="Kontak telepon" required>
-                        <span class="icon is-small is-left"><i class="fas fa-phone"></i></span>
-                    </div>
-                </div>
-                <div class="field">
-                    <div class="columns">
-                        {#                                <div class="column is-6">#}
-                        {#                                    <label class="label">Kelas kamar</label>#}
-                        {#                                    <div class="control is-expanded">#}
-                        {#                                        <div class="select">#}
-                        {#                                            <select>#}
-                        {#                                                <option>Standard</option>#}
-                        {#                                                <option>VIP</option>#}
-                        {#                                            </select>#}
-                        {#                                        </div>#}
-                        {#                                    </div>#}
-                        {#                                </div>#}
-{#                        <div class="column is-6">#}
-{#                            <label class="label">Kamar</label>#}
-{#                            <div class="select">#}
-{#                                <select name="id_kamar" class="control">#}
-{#                                    {% for kamar in kamars %}#}
-{#                                        <option value="{{ kamar.id }}">{{ kamar.nama_kamar }}</option>#}
-{#                                    {% endfor %}#}
-{#                                </select>#}
-{#                            </div>#}
-{#                        </div>#}
-                        <div class="column is-6 wisma">
-                            <label class="label">Wisma</label>
-                            <div class="select">
-                                <select onchange="tampil_kelas()" name="id_wisma" class="control" required>
-                                    <option>--- Pilih Wisma ---</option>
-                                    {% for wisma in wismas %}
-                                        <option value="{{ wisma.id }}">{{ wisma.nama_wisma }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
                         </div>
-                        <div class="column is-6 kelas" style="display: none">
-                            <label class="label">Kelas Kamar</label>
-                            <div class="select">
-                                <select onchange="tampil_harga()" name="id_kelas" class="control" required>
-                                </select>
+                    </div>
+                    <div class="field">
+                        <label for="alamat_konsumen" class="label">Alamat</label>
+                        <div class="control">
+                            <textarea id="alamat_konsumen" name="alamat_konsumen" class="textarea" placeholder="Alamat lengkap" rows="2" required></textarea>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="kontak_konsumen" class="label">No. telp</label>
+                        <div class="control is-expanded has-icons-left">
+                            <input id="kontak_konsumen" name="kontak_konsumen" class="input" type="text" placeholder="Kontak telepon" required>
+                            <span class="icon is-small is-left"><i class="fas fa-phone"></i></span>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="columns">
+                            <div class="column is-6 wisma">
+                                <label for="id_wisma" class="label">Wisma</label>
+                                <div class="select">
+                                    <select id="id_wisma" onchange="tampil_kelas()" name="id_wisma" class="control" required>
+                                        <option>--- Pilih Wisma ---</option>
+                                        {% for wisma in wismas %}
+                                            <option value="{{ wisma.id }}">{{ wisma.nama_wisma }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="column is-6 kelas" style="display: none">
+                                <label for="id_kelas" class="label">Kelas Kamar</label>
+                                <div class="select">
+                                    <select id="id_kelas" onchange="tampil_harga()" name="id_kelas" class="control" required>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="field harga" style="display: none">
-                    <label class="label">Harga</label>
-                    <h3 id="harga" class="title is-3">Rp. 1000.000</h3>
-                </div>
-                <div class="field">
-                    <label class="label">Lama sewa</label>
-                    <div id="range-labels" class="tab-content control is-expanded">
-                        <input name="tanggal" id="booking_date" class="input" data-is-range="true" type="date" required>
+                    <div class="field harga" style="display: none">
+                        <label for="harga" class="label">Harga</label>
+                        <h3 id="harga" class="title is-3">Rp. 1000.000</h3>
                     </div>
-                </div>
-                <div class="field is-grouped">
-                    <div class="control">
-                        <button type="submit" class="button is-link">Submit</button>
+                    <div class="field">
+                        <label for="booking_date" class="label">Lama sewa</label>
+                        <div id="range-labels" class="tab-content control is-expanded">
+                            <input name="tanggal" id="booking_date" class="input is-primary" data-is-range="true" type="date" required>
+                        </div>
                     </div>
-                    <div class="control">
-                        <button type="reset" class="button is-link is-light">Reset</button>
+                    <div class="field is-grouped">
+                        <div class="control">
+                            <button type="submit" class="button is-link">Submit</button>
+                        </div>
+                        <div class="control">
+                            <button type="reset" class="button is-link is-light">Reset</button>
+                        </div>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 </div>
@@ -183,16 +162,19 @@
 
     function tampil_harga() {
         const harga = $('#harga');
-        let harga_kelas = $('.kelas option:selected').attr('data-harga');
-        harga.val(harga);
-        harga.html(formatRupiah(harga_kelas, 'Rp. ') + ' / hari');
-        $('.harga').show();
+        let harga_kelas = $('.kelas option:selected').data('harga');
+        if (harga_kelas !== undefined) {
+            harga.html(formatRupiah(harga_kelas.toString(), 'Rp. ') + ' / hari');
+            $('.harga').show();
+        } else {
+            $('.harga').hide();
+        }
     }
 
     function before_wisma() {
         wisma.attr('disabled', true);
         wisma.addClass('is-loading');
-        $('.kelas').hide();
+        kelas.hide();
         $('.harga').hide();
     }
 
@@ -212,7 +194,6 @@
             separator = sisa ? '.' : '';
             rupiah += separator + ribuan.join('.');
         }
-
         rupiah = split[1] !== undefined ? rupiah + ',' + split[1] : rupiah;
         return prefix === undefined ? rupiah : (rupiah ? 'Rp. ' + rupiah : '');
     }
